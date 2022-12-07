@@ -27,7 +27,15 @@ struct ContentView: View {
     
     @State private var correctAnswer = Int.random(in: 0...2)
     
+    @State private var animationAmount = 0.0
+    @State private var animationWrong = 0.0
+    @State private var numberTapped = 0  // Helper
+    @State private var opacityLevel = 1.0
+    
+    
+    
     var body: some View {
+        
         ZStack{
             RadialGradient(stops: [
                 .init(color: Color(red: 0.1, green: 0.2, blue: 0.45), location: 0.3),
@@ -58,6 +66,9 @@ struct ContentView: View {
                         } label: {
                             FlagImage(imageFileName: countries[number])
                         }
+                        .rotation3DEffect(.degrees(isThePressed(number) ? animationAmount : animationWrong),
+                        axis: isThePressed(number) ? (x: 0, y: 1, z: 0) : (x: 1, y: 0, z: 0) )
+                        .opacity(!isThePressed(number) ? opacityLevel : 1)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -88,7 +99,20 @@ struct ContentView: View {
         }
     }
     
+    func isThePressed(_ num: Int) -> Bool{
+        String(countries[numberTapped]) == String(countries[num])
+    }
+    
     func flagTapped(_ number: Int){
+        
+        numberTapped = number  // To verify in the rotating3d
+        
+        withAnimation{
+            animationAmount = 360
+            opacityLevel = 0.25
+            animationWrong = 180
+        }
+        
         phase += 1
         
         if number == correctAnswer{
@@ -111,11 +135,15 @@ struct ContentView: View {
     func askQuestion(){  // resset the game
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        opacityLevel = 1
+        animationWrong = 0.0
     }
     
     func resetGame(){
         score = 0
         countries.shuffle()
+        opacityLevel = 1
+        animationWrong = 0.0
     }
 }
 
